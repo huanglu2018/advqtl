@@ -2,26 +2,38 @@
 
 setwd("~/proj/advqtl/R")
 rm(list=ls())
-install.packages("BiocManager")
-pacman::p_load(pacman,qtl,tidyr,tibble,magrittr,data.table,reshape2,qtl2,yaml)
+# install.packages("BiocManager")
+pacman::p_load(BiocManager,pacman,qtl,tidyr,tibble,magrittr,data.table,reshape2,qtl2,yaml)
+
+# input
+pheno_raw_f="~/proj/advqtl/data/res_phe6_BLUE.rds"
+gt_raw_f="~/proj/advqtl/data/gt.csv"
+gmap_raw_f="~/proj/advqtl/data/all.map.order.csv"
 
 #
-phe=readRDS("~/proj/advqtl/data/res_phe6_BLUE.rds") %>%
-  dcast(data=.,line ~ phe,value.var="BLUE")
-colnames(phe)[1]="id"
-write.csv(phe,"~/proj/advqtl/data/pheno.csv",quote = F,row.names = F)
-
-gt_f="~/proj/advqtl/data/gt.csv"
-gt_raw=read.csv(gt_f)
-gt=gt_raw[-c(1:2),]
-write.csv(gt,"~/proj/advqtl/data/geno.csv",quote = F,row.names = F)
+phe_f="~/proj/advqtl/data/pheno.csv"
+gt_f="~/proj/advqtl/data/geno.csv"
+gmap_f="~/proj/advqtl/data/gmap.csv"
 
 
-gmap_f="~/proj/advqtl/data/all.map.order.csv"
-gmap=read.csv(gmap_f) %>% dplyr::select(-c("phy_posi")) %>%
-  set_colnames(c("marker","chr","pos"))
-write.csv(gmap,"~/proj/advqtl/data/gmap.csv",quote = F,row.names = F)
+if(!(file.exists(phe_f))){
+  phe=readRDS(pheno_raw_f) %>%
+    dcast(data=.,line ~ phe,value.var="BLUE")
+  colnames(phe)[1]="id"
+  write.csv(phe,phe_f,quote = F,row.names = F)
+}
 
+if(!(file.exists(phe_f))){
+  gt_raw=read.csv(gt_raw_f)
+  gt=gt_raw[-c(1:2),]
+  write.csv(gt,gt_f,quote = F,row.names = F)
+}
+
+if(!(file.exists(gmap_f))){
+  gmap=read.csv(gmap_raw_f) %>% dplyr::select(-c("phy_posi")) %>%
+    set_colnames(c("marker","chr","pos"))
+  write.csv(gmap,gmap_f,quote = F,row.names = F)
+}
 
 
 # write_yaml(data.frame(a=1:10, b=letters[1:10], c=11:20), "~/Downloads/qtl/gt/test2.yaml")
