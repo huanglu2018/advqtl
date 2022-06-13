@@ -1,20 +1,23 @@
 # qtl2 pipe
+# only for crosstype: riself
 
 setwd("~/proj/advqtl/R")
 rm(list=ls())
 # install.packages("BiocManager")
-pacman::p_load(BiocManager,pacman,qtl,tidyr,tibble,magrittr,data.table,reshape2,qtl2,yaml)
+pacman::p_load(BiocManager,stringr,pacman,qtl,tidyr,tibble,magrittr,data.table,reshape2,qtl2,yaml)
 
 # input
 pheno_raw_f="~/proj/advqtl/data/res_phe6_BLUE.rds"
 gt_raw_f="~/proj/advqtl/data/gt.csv"
 gmap_raw_f="~/proj/advqtl/data/all.map.order.csv"
+qtl2_dir="~/proj/advqtl/data"
 
-#
-phe_f="~/proj/advqtl/data/pheno.csv"
-gt_f="~/proj/advqtl/data/geno.csv"
-gmap_f="~/proj/advqtl/data/gmap.csv"
 
+
+if(!dir.exists(qtl2_dir)) dir.create(qtl2_dir)
+phe_f=paste0(qtl2_dir,"/pheno.csv")
+gt_f=paste0(qtl2_dir,"/geno.csv")
+gmap_f=paste0(qtl2_dir,"/gmap.csv")
 
 if(!(file.exists(phe_f))){
   phe=readRDS(pheno_raw_f) %>%
@@ -35,12 +38,34 @@ if(!(file.exists(gmap_f))){
   write.csv(gmap,gmap_f,quote = F,row.names = F)
 }
 
+date_str = function(full=F){
+  if(full==T){
+    return(paste(gsub("-","_",Sys.Date()),"_",paste(unlist(str_split(unlist(str_split(Sys.time()," "))[2],":")),collapse = "_"),sep = ""))
+  }else{
+    return(gsub("-","_",Sys.Date()))
+  }
+}
 
-# write_yaml(data.frame(a=1:10, b=letters[1:10], c=11:20), "~/Downloads/qtl/gt/test2.yaml")
+config_f=paste0(date_str(T),".yaml")
+cat(paste0("see config yaml file in ",qtl2_dir,"/",config_f))
+setwd(qtl2_dir)
+write("crosstype: riself",config_f,append = T)
+write("geno: geno.csv",config_f,append = T)
+write("pheno: pheno.csv",config_f,append = T)
+write("gmap: gmap.csv",config_f,append = T)
+write("alleles:",config_f,append = T)
+write("- a",config_f,append = T)
+write("- b",config_f,append = T)
+write("genotypes:",config_f,append = T)
+write("a: 1",config_f,append = T)
+write("h: 2",config_f,append = T)
+write("b: 3",config_f,append = T)
+write("na.strings:",config_f,append = T)
+write("- '-'",config_f,append = T)
+write("- NA",config_f,append = T)
 
 
-
-s=qtl2::read_cross2("~/proj/advqtl/data/test.yaml")
+s=qtl2::read_cross2(config_f)
 
 map <- insert_pseudomarkers(s$gmap, step=1)
 probs <- calc_genoprob(s, map, error_prob=0.002)
