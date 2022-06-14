@@ -1,6 +1,11 @@
 
 
-blue_raw=readRDS("~/res_phe6_BLUE.rds")
+pacman::p_load(BiocManager,stringr,pacman,qtl,tidyr,tibble,magrittr,data.table,reshape2,eqtl,yaml)
+
+if(!require(eqtl)) install.packages("https://cran.r-project.org/src/contrib/Archive/eqtl/eqtl_1.1-7.tar.gz", repos = NULL, type = "source")
+
+
+phe_raw_f=readRDS("~/proj/advqtl/data/res_phe6_BLUE.rds")
 
 gt_dir="~/Downloads/qtl/gt"
 phe_dir="~/Downloads/qtl/phe"
@@ -8,7 +13,7 @@ phe_dir="~/Downloads/qtl/phe"
 dir.create(gt_dir,recursive = T)
 dir.create(phe_dir,recursive = T)
 
-blue_phe=dcast(data=blue_raw,line ~ phe,value.var="BLUE") %>%
+phe=dcast(data=phe_raw_f,line ~ phe,value.var="BLUE") %>%
   column_to_rownames("line") %>% as.matrix()
 
 gt_raw_f="~/Downloads/gt_raw.csv"
@@ -21,16 +26,16 @@ gt_raw2=gt_raw %>% column_to_rownames("Locus")
 gt_raw2$Pos=cM_ref[gt_raw$Locus,"genetic_posi"]
 
 gt=gt_raw2%>% t() %>% as.data.frame() %>%
-  .[-c(3:5),] %>% .[c("Chr","Pos",rownames(blue_phe)),] %>% rownames_to_column("id")
+  .[-c(3:5),] %>% .[c("Chr","Pos",rownames(phe)),] %>% rownames_to_column("id")
 gt[1,1]=""
 gt[2,1]=""
 
 write.csv(gt,file = gt_f,quote = F,row.names = F)
 
-for(i in colnames(blue_phe)){
+for(i in colnames(phe)){
   print(i)
   sub_phe_f=paste0(phe_dir,"/",i,".csv")
-  sub_phe=blue_phe[,i,drop=F] %>% as.data.frame() %>% rownames_to_column("id") %>%
+  sub_phe=phe[,i,drop=F] %>% as.data.frame() %>% rownames_to_column("id") %>%
     set_colnames(c("id","phe")) %>% .[,c("phe","id")]
   write.csv(sub_phe,sub_phe_f,quote = F,row.names = F)
   s=qtl::read.cross("csvs", "", gt_f, sub_phe_f, genotypes=c("a","h","b","d","c"),

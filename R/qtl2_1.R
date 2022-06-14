@@ -12,8 +12,6 @@ gt_raw_f="~/proj/advqtl/data/gt.csv"
 gmap_raw_f="~/proj/advqtl/data/all.map.order.csv"
 qtl2_dir="~/proj/advqtl/data"
 
-
-
 if(!dir.exists(qtl2_dir)) dir.create(qtl2_dir)
 phe_f=paste0(qtl2_dir,"/pheno.csv")
 gt_f=paste0(qtl2_dir,"/geno.csv")
