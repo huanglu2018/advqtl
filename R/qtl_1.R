@@ -8,7 +8,7 @@ blue_raw=readRDS("~/res_phe6_BLUE.rds")
 dir.create(gt_dir,recursive = T)
 dir.create(phe_dir,recursive = T)
 
-blue_phe=dcast(data=blue_raw,line ~ phe,value.var="BLUE") %>% 
+blue_phe=dcast(data=blue_raw,line ~ phe,value.var="BLUE") %>%
   column_to_rownames("line") %>% as.matrix()
 
 gt_raw_f="~/Downloads/gt_raw.csv"
@@ -33,19 +33,19 @@ for(i in colnames(blue_phe)){
   sub_phe=blue_phe[,i,drop=F] %>% as.data.frame() %>% rownames_to_column("id") %>%
     set_colnames(c("id","phe")) %>% .[,c("phe","id")]
   write.csv(sub_phe,sub_phe_f,quote = F,row.names = F)
-  s=qtl::read.cross("csvs", "", gt_f, sub_phe_f, genotypes=c("a","h","b","d","c"), 
+  s=qtl::read.cross("csvs", "", gt_f, sub_phe_f, genotypes=c("a","h","b","d","c"),
                     alleles=c("a","b"),)
-  
+
   # for(i in 3:NROW(gt)){
   #   # print(gt[i,1])
   #   if(length(unique(unname(t(gt[i,]))))>4) print(gt[i,1])
   # }
-# 
+#
 #   summary(s)
 #   plotMap(s)
-#   
+#
 #   plotPheno(s, pheno.col=1)
-  
+
   ## 计算基因型概率
   s <- calc.genoprob(s, step=1)
   ## 使用默认方法进行single-QTL全基因组扫描
@@ -56,11 +56,11 @@ for(i in colnames(blue_phe)){
   # summary(out.em, threshold=3)
   # ## 展示结果
   # plot(out.em)
-  
-  
+
+
   out.hk <- scanone(s, method="hk")
   mythreshold=0.2
-  
+
   ## 进行1000次Permutation test
   operm <- scanone(s, method="hk", n.perm=1000)
   # operm <- scanone(s, n.perm=1000)
@@ -68,12 +68,12 @@ for(i in colnames(blue_phe)){
   # summary(operm, alpha=c(0.05, 0.2))
   summary(operm, alpha=c(mythreshold))
   summary(operm, 0.05)
-  
-  
-  ## 从扫描结果中挑选显著的位点
+
+
+  ## 从扫描结果中挑选显著的位点,后续发现qtl2包，暂时不用自己手动挑选位点
   summary(out.hk, perms=operm, alpha=0.2, pvalues=TRUE)
   summary(out.hk, threshold=2.5,format="allpeaks")
-  
+
   scanoneFiltGenedenovo=function(scanoneOutObj,lod_threshold){
     p_load(dplyr)
     # scanoneOutObj=out.hk
@@ -85,11 +85,11 @@ for(i in colnames(blue_phe)){
     if(length(chr_list>0)){
       for(each_chr in chr_list){
         subFiltM=filtM %>% filter(chr==each_chr)
-        
+
       }
-      
+
     }
-    
+
   }
 }
 
