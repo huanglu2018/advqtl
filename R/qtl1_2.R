@@ -1,8 +1,23 @@
 
+# preprocessing data
+preprocess_phe=function(in_f){
+  in_f="~/proj/advqtl/data/res_phe6_BLUE.rds"
+}
 
-pacman::p_load(BiocManager,stringr,pacman,qtl,tidyr,tibble,magrittr,data.table,reshape2,eqtl,yaml)
+if(!require("openxlsx")) install.packages("openxlsx")
 
-if(!require(eqtl)) install.packages("https://cran.r-project.org/src/contrib/Archive/eqtl/eqtl_1.1-7.tar.gz", repos = NULL, type = "source")
+
+run_advqtl=function(phenotype_file, threshold){
+
+  # load required packages
+  wqtl_pkg_url="https://cran.r-project.org/src/contrib/Archive/eqtl/eqtl_1.1-7.tar.gz"
+  if(!require(eqtl)) install.packages(wqtl_pkg_url, repos = NULL, type = "source")
+  if(!require(pacman)) install.packages("pacman")
+  pacman::p_load(openxlsx,readr,pacman,BiocManager,stringr,pacman,qtl,tidyr,tibble,magrittr,data.table,reshape2)
+
+
+}
+
 
 
 phe_raw_f=readRDS("~/proj/advqtl/data/res_phe6_BLUE.rds")
