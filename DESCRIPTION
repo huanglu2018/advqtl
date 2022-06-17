@@ -35,4 +35,4 @@ imports:
     pbkrtest,
     lmerTest,
     PerformanceAnalytics
-RoxygenNote: 7.0.0
+RoxygenNote: 7.2.0
