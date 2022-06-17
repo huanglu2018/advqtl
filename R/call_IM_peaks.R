@@ -1,3 +1,21 @@
+#' call_IM_peaks use genotype file, loci mapping file and phenotype file (can be the result file of pheno2BLUX)
+#'
+#' @param df three csv files with the structure below
+#'
+#' @return example see data(result_example)
+#' @export
+#'
+#' @examples input example:
+#'
+#'
+#'
+#'
+
+
+
+
+
+
 call_IM_peaks=function(gt_file, gmap_file, phe_file, pval_threshold, crosstype=""){
 
   crosslist=c("bc","f2","risib","riself","4way")
