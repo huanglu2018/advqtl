@@ -1,4 +1,4 @@
-pheno2BLUX=function(phe_raw_f,impute_phe_f,phe_BLU_f,BLUP_or_BLUE="BLUP"){
+pheno2BLUX=function(phe_raw_f,phe_BLU_f,BLUP_or_BLUE="BLUP",impute_phe_f=NA){
 
   # xlsx example:↓
 
@@ -21,10 +21,11 @@ pheno2BLUX=function(phe_raw_f,impute_phe_f,phe_BLU_f,BLUP_or_BLUE="BLUP"){
   if(!require("DMwR")) install.packages(DMwR_pkg_url, repos = NULL, type = "source")
   p_load(DMwR)
 
-  # phe_raw_f="~/proj/advqtl/data/phe_raw.xlsx"
-  phe_raw=openxlsx::read.xlsx(phe_raw_f,sheet = 1)
+  # phe_raw_f="~/proj/advqtl/data/test/phe_raw.fdas"
+  if(!(grepl(".csv", phe_raw_f, fixed = TRUE))) stop("phe_raw_f should be a .csv file!")
+  phe_raw=read.csv(phe_raw_f)
 
-  sub_id_list=colnames(phe_raw) %>% grep("id",.,value=T,invert = T)
+    sub_id_list=colnames(phe_raw) %>% grep("id",.,value=T,invert = T)
   sub_phe=phe_raw[,c(sub_id_list)]
   rownames(sub_phe)=phe_raw$id
 
@@ -38,7 +39,7 @@ pheno2BLUX=function(phe_raw_f,impute_phe_f,phe_BLU_f,BLUP_or_BLUE="BLUP"){
   }
 
   # out_phe_f="~/Downloads/knnImput_phe.csv"
-  write.csv(knnImput_phe,impute_phe_f)
+  if(!(is.na(impute_phe_f)))  write.csv(knnImput_phe,impute_phe_f)
 
   phe2_df=colnames(knnImput_phe) %>% as.data.frame() %>%
     separate(.,1,c("phe","year"),"20",remove = F) %>%
@@ -58,14 +59,14 @@ pheno2BLUX=function(phe_raw_f,impute_phe_f,phe_BLU_f,BLUP_or_BLUE="BLUP"){
       sub_df=merge(phe2_df,sub_knnImput_phe_long,by.y="variable",by.x="id")
       cols=3:4
       sub_df[,cols]=sub_df%>% select(all_of(cols)) %>% map_df(as.factor)
-      print(dim(sub_df))
+      # print(dim(sub_df))
       # colnames(sub_df)[5]="OA"
       # m1=lmer(value ~ line + (1|year) + (1|line:year), data=sub_df)
       m1=lmer(value ~ line + (1|year), data=sub_df)
       summary(m1)
       re1=emmeans(m1,"line") %>% as.data.frame()
       re2=re1 %>% .[,1:2] %>% mutate(phe=i)
-      res_raw=rbind(res_raw,re2)
+      res_raw=suppressWarnings(rbind(res_raw,re2))
     }
   }else{
     res_raw=""
@@ -85,7 +86,7 @@ pheno2BLUX=function(phe_raw_f,impute_phe_f,phe_BLU_f,BLUP_or_BLUE="BLUP"){
       summary(m1)
       re1=ranef(m1)$line %>% as.data.frame() %>% rownames_to_column("line") %>% set_colnames(c("line","BLUP"))
       re2=re1 %>% .[,1:2] %>% mutate(phe=i)
-      res_raw=rbind(res_raw,re2)
+      res_raw=suppressWarnings(rbind(res_raw,re2))
     }
   }
 
@@ -101,12 +102,12 @@ pheno2BLUX=function(phe_raw_f,impute_phe_f,phe_BLU_f,BLUP_or_BLUE="BLUP"){
   write.csv(res2,phe_BLU_f)
 
   # chart.Correlation(res2,histogram = T,pch=19)
-  return(res2)
+  # return(res2)
 }
 
-#
+
 # phe_raw_f="~/proj/advqtl/data/phe_raw.xlsx"
-# impute_phe_f="~/imput.csv"
+# impute_phe_f="~/impute.csv"
 # phe_BLU_f="~/BLUE.csv"
 # BLUP_or_BLUE="BLUE"
 

@@ -1,11 +1,38 @@
 Package: advqtl
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Pipeline designed for the QTL analysis of peanut 
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
+Author: Huang Lu
+Maintainer: Huang Lu <huanglu705122613@foxmail.com>
+Description: what it can do:    *Data knn imputation    *calculate BLUP and BLUE values    *conduct IM-QTL and CIM-QTL
     Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+License: GPL
 Encoding: UTF-8
 LazyData: true
+imports: 
+    data.table,
+    tidyr,
+    magrittr,
+    dplyr,
+    foreach,
+    ggplot2,
+    rtracklayer,
+    pacman,
+    tibble
+    BiocManager,
+    stringr,
+    qtl,
+    reshape2,
+    openxlsx,
+    xts,
+    quantmod,
+    zoo,
+    abind,
+    ROCR,
+    purrr,
+    emmeans,
+    lme4,
+    pbkrtest,
+    lmerTest,
+    PerformanceAnalytics
+RoxygenNote: 7.0.0
