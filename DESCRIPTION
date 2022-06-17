@@ -4,7 +4,7 @@ Title: Pipeline designed for the QTL analysis of peanut
 Version: 0.1.0
 Author: Huang Lu
 Maintainer: Huang Lu <huanglu705122613@foxmail.com>
-Description: what it can do:    *Data knn imputation    *calculate BLUP and BLUE values    *conduct IM-QTL and CIM-QTL
+Description: what it can do: Data knn imputation, calculate BLUP and BLUE values, conduct IM-QTL and CIM-QTL
     Use four spaces when indenting paragraphs within the Description.
 License: GPL
 Encoding: UTF-8

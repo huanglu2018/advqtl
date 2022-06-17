@@ -1,22 +1,43 @@
 #' call_IM_peaks use genotype file, loci mapping file and phenotype file (can be the result file of pheno2BLUX)
 #'
-#' @param df three csv files with the structure below
+#' @param gt_file three csv files with the structure below
+#' @param gmap_file three csv files with the structure below
+#' @param phe_file three csv files with the structure below
+#' @param pval_threshold pvalue for the determination of threshold lod value, default 0.05
+#' @param crosstype one from "bc","f2","risib","riself","4way"
+#'
 #'
 #' @return example see data(result_example)
 #' @export
 #'
-#' @examples input example:
+#' @examples
+#'
+#' gt_file (.csv) example:
+#' Chr,Pos,p1(P),p2(M),Locus,Classification,og1,og10,og100
+#' CM014315.1,1694837,0|0,1|1,CM014315.1_1694837,"(a,h,b)",b,a,b
+#' CM014315.1,1932696,0|0,1|1,CM014315.1_1932696,"(a,h,b)",b,a,b
+#' CM014315.1,2058342,0|0,1|1,CM014315.1_2058342,"(a,h,b)",b,a,b
+#'
+#' gmap_file (.csv) example:
+#' Locus,LG,genetic_posi,phy_posi
+#' CM014315.1_1694837,CM014315.1,0,1694837
+#' CM014315.1_1932696,CM014315.1,0.25,1932696
+#' CM014315.1_2058342,CM014315.1,0.5,2058342
+#' CM014315.1_2400548,CM014315.1,0.75,2400548
+#'
+#' phe_file (.csv) example:
+#' Line,OA,LA,Oil,Prot
+#' og1,64.504,21.069,49.792,24.649
+#' og10,70.415,17.5575,45.94,28.79
+#' og100,50.626,34.521,51.175,27.577
 #'
 #'
 #'
-#'
 
 
 
 
-
-
-call_IM_peaks=function(gt_file, gmap_file, phe_file, pval_threshold, crosstype=""){
+call_IM_peaks=function(gt_file, gmap_file, phe_file, pval_threshold=0.05, crosstype=""){
 
   crosslist=c("bc","f2","risib","riself","4way")
   if (!(crosstype %in% crosslist)) stop(paste0("crosstype canc only be one of the following: ",paste0(crosslist,collapse = " ")))
