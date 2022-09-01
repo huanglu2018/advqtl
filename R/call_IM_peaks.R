@@ -59,13 +59,21 @@ call_IM_peaks=function(gt_file, gmap_file, phe_file, pval_threshold=0.05, crosst
 
   phe_raw=read.csv(phe_file)
   colnames(phe_raw)[1]="id"
-  phe=cbind(phe_raw[,-1],phe_raw[,1,drop=F])
+
+  gt_raw=read.csv(gt_file)
+  id_inter=intersect(phe_raw$id,colnames(gt_raw)[7:NCOL(gt_raw)])
+
+  print(paste0("A total of ",length(id_inter)," samples kept after checking for intersect."))
+
+  phe_raw2=phe_raw %>% column_to_rownames("id") %>% .[id_inter,] %>% rownames_to_column("id")
+  gt_raw1=cbind(gt_raw[,1:6],gt_raw[,id_inter])
+
+  phe=cbind(phe_raw2[,-1],phe_raw2[,1,drop=F])
 
   # merge gt and gmap file
-  gt_raw=read.csv(gt_file)
   cM_ref=read.csv(gmap_file) %>% column_to_rownames("Locus")
-  gt_raw2=gt_raw %>% column_to_rownames("Locus")
-  gt_raw2$Pos=cM_ref[gt_raw$Locus,"genetic_posi"]
+  gt_raw2=gt_raw1 %>% column_to_rownames("Locus")
+  gt_raw2$Pos=cM_ref[gt_raw1$Locus,"genetic_posi"]
   gt=gt_raw2%>% t() %>% as.data.frame() %>%
     .[-c(3:5),] %>% .[c("Chr","Pos",phe$id),] %>% rownames_to_column("id")
   gt[1,1]=""
