@@ -98,23 +98,73 @@ call_IM_peaks=function(gt_file, gmap_file, phe_file, pval_threshold=0.05, crosst
     print(paste0(i," get a lod threshold of ",format(lod_threshold,digit=4),
                  " when the pvalue was set to ",pval_threshold))
     each_peaklist=eqtl::define.peak(out.em,lodcolumn=i,th=lod_threshold,si=1.5,graph=FALSE,window.size=10)
+    subRes_raw=""
     for(j in names(each_peaklist[[i]])){
       if(is.data.frame(each_peaklist[[i]][[j]])){
         each_chr_peak=each_peaklist[[i]][[j]]
-        each_chr_peak2=cbind(trait=i,each_chr_peak)
-        res_raw=rbind(res_raw,each_chr_peak2)
+        each_chr_peak2=cbind(trait=i,chr=j,each_chr_peak)
+        subRes_raw=rbind(subRes_raw,each_chr_peak2)
       }
     }
-  }
+  #### get pve values for each trait
+    resGetPve=function(res,crossObj,pheno.col){
+      sigQtlNumber=res %>% as.data.frame() %>% remove_rownames() %>% NROW()
+      myformula=as.formula(paste0("y ~ ",paste0("Q",seq(sigQtlNumber),collapse = " + ")))
+      mqtl=makeqtl(crossObj, chr=res[,2], pos=as.numeric(res[,5]), what=c("prob"))
+      fqtl<-fitqtl(crossObj,pheno.col=pheno.col,dropone=T,get.ests=T,
+                   model="normal", qtl=mqtl,method="hk",formula=myformula)
+      if(sigQtlNumber>1){
+        pveRes=summary(fqtl)$result.drop[,c(4),drop=F] %>% as.data.frame() %>% set_colnames(c("pve"))
+      }else{
+        pveRes=summary(fqtl)$result.full[1,c(5),drop=F] %>% as.data.frame() %>% set_colnames(c("pve"))
+      }
+      resOut1=cbind(res[,1:5],pveRes[,1,drop=F])
+      resOut2=cbind(resOut1,res[,6:NCOL(res)])
+      return(resOut2)
+    }
 
+    if(!(is.data.frame(subRes_raw))) next
+    subRes_raw2=subRes_raw[-1,] %>% as.data.frame()
+    subRes=resGetPve(subRes_raw2,s,i)
+    res_raw=rbind(res_raw,subRes)
+  }
+  if(!(is.data.frame(res_raw))) stop("no significant loci for any of the traits !!!")
   res=res_raw[-1,] %>% as.data.frame()
   return(res)
 }
 
-# s=call_IM_peaks("~/proj/advqtl/data/test/gt_raw.csv",
-#                 "~/proj/advqtl/data/test/all.map.order.csv",
-#                 "~/proj/advqtl/data/test/phe_raw_official.csv",
+
+
+#
+# ## wrf input
+#
+# s=call_IM_peaks("~/proj/advqtl/data/test/gt.csv",
+#                 "~/proj/advqtl/data/test/gmap.csv",
+#                 "~/proj/advqtl/data/test/phe.csv",
 #                 0.05,"riself")
 #
-# write.csv(s,"~/proj/advqtl/data/test/res_reproduce.csv")
+# write.csv(s,"~/proj/advqtl/data/test/res.csv")
+#
+# gt_file="~/proj/advqtl/data/test/gt.csv"
+# gmap_file="~/proj/advqtl/data/test/gmap.csv"
+# phe_file="~/proj/advqtl/data/test/phe.csv"
+# pval_threshold=0.05
+# crosstype="riself"
+#
+# ## gda input
+#
+# s=call_IM_peaks("~/proj/advqtl/data/test2/gt.csv",
+#                 "~/proj/advqtl/data/test2/all.map.order.csv",
+#                 "~/proj/advqtl/data/test2/phe_GdaImpute.csv",
+#                 0.05,"riself")
+#
+# write.csv(s,"~/proj/advqtl/data/test2/res_reproduce.csv")
+#
+# gt_file="~/proj/advqtl/data/test2/gt.csv"
+# gmap_file="~/proj/advqtl/data/test2/all.map.order.csv"
+# phe_file="~/proj/advqtl/data/test2/phe_GdaImpute.csv"
+# pval_threshold=0.05
+# crosstype="riself"
+#
+#
 
