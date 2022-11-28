@@ -52,7 +52,7 @@ call_IM_peaks=function(gt_file, gmap_file, phe_file, pval_threshold=0.05, crosst
   wqtl_pkg_url="https://cran.r-project.org/src/contrib/Archive/eqtl/eqtl_1.1-7.tar.gz"
   if(!require(eqtl)) install.packages(wqtl_pkg_url, repos = NULL, type = "source")
   if(!require(pacman)) install.packages("pacman")
-  pacman::p_load(pacman,BiocManager,stringr,pacman,qtl,tidyr,tibble,magrittr,data.table,reshape2,eqtl)
+  pacman::p_load(pacman,ggplotify,ggplot2,BiocManager,stringr,pacman,qtl,tidyr,tibble,magrittr,data.table,reshape2,eqtl)
 
   input_phe_file=paste0(tempdir(),"/input_phe.csv")
   input_gt_file=paste0(tempdir(),"/input_gt.csv")
@@ -85,15 +85,26 @@ call_IM_peaks=function(gt_file, gmap_file, phe_file, pval_threshold=0.05, crosst
   s=qtl::read.cross("csvs", "",
                     input_gt_file, input_phe_file,
                     genotypes=c("a","h","b","d","c"),
-                    alleles=c("a","b"),crosstype="riself")
+                    alleles=c("a","b"),crosstype=crosstype)
   s <- calc.genoprob(s, step=1)
   out.em <- scanone(s, pheno.col=1:(NCOL(phe)-1), model='normal', method='hk')
 
   res_raw=""
+  pic_list=list()
 
   for (i in names(s$pheno)[-c(length(s$pheno))]){
     print(i)
     operm <- scanone(s, pheno.col= i,method="hk", n.perm=1000)
+
+    out_i=scanone(s, pheno.col=i, model='normal', method='hk')
+    out_i$chr=as.character(out_i$chr)
+    p = ggplot(out_i,aes(pos,lod))+
+      geom_line()+
+      facet_grid(. ~chr, scales = "free", space = "free")+
+      theme_bw()
+
+    pic_list[[i]]=p
+
     lod_threshold=summary(operm, alpha=c(pval_threshold)) %>% as.numeric()
     print(paste0(i," get a lod threshold of ",format(lod_threshold,digit=4),
                  " when the pvalue was set to ",pval_threshold))
@@ -130,7 +141,7 @@ call_IM_peaks=function(gt_file, gmap_file, phe_file, pval_threshold=0.05, crosst
   }
   if(!(is.data.frame(res_raw))) stop("no significant loci for any of the traits !!!")
   res=res_raw[-1,] %>% as.data.frame()
-  return(res)
+  return(list(sig_res=res,pic=pic_list))
 }
 
 
